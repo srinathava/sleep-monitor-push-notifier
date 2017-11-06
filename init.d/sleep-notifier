@@ -12,12 +12,14 @@
 
 . /lib/lsb/init-functions
 
-INSTALL_DIR=/home/pi/code/sleep-monitor-push-notifier
+SCRIPT=`realpath $0`
+SCRIPT_DIR=`dirname $SCRIPT`
+INSTALL_DIR=`realpath ${SCRIPT_DIR}/..`
 
 test -f ${INSTALL_DIR}/index.js || exit 0
 
 start() {
-    log_daemon_msg "Starting Sleep Monitor server" "sleepmonitor"
+    log_daemon_msg "Starting Sleep Monitor Notification server" "sleepmonitor-notifier"
     start-stop-daemon --start --quiet --oknodo \
         --chdir ${INSTALL_DIR} \
         --exec /usr/local/bin/node \
@@ -28,7 +30,7 @@ start() {
 }
 
 stop() {
-    log_daemon_msg "Stopping Sleep Monitor server" "sleepmonitor"
+    log_daemon_msg "Stopping Sleep Monitor Notification server" "sleepmonitor-notifier"
     start-stop-daemon --stop --quiet --oknodo \
         --pidfile /var/run/sleepmonitor-notifier.pid \
         --remove-pidfile \
