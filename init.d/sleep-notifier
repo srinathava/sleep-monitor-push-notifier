@@ -22,7 +22,7 @@ start() {
     log_daemon_msg "Starting Sleep Monitor Notification server" "sleepmonitor-notifier"
     start-stop-daemon --start --quiet --oknodo \
         --chdir ${INSTALL_DIR} \
-        --exec /usr/local/bin/node \
+        --exec `which nodejs` \
         --background --make-pidfile \
         --pidfile /var/run/sleepmonitor-notifier.pid \
         -- index.js

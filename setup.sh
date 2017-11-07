@@ -3,7 +3,7 @@
 SCRIPT=`realpath $0`
 SCRIPT_DIR=`dirname $SCRIPT`
 
-sudo apt-get install npm
+sudo apt-get install -y nodejs npm
 
 # update itself
 sudo npm install -g npm
