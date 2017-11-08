@@ -24,7 +24,7 @@ class PushNotifier {
     }
 
     _sendNotification() {
-        if (this.deviceTokens === []) {
+        if (this.deviceTokens.size == 0) {
             return;
         }
 

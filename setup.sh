@@ -11,4 +11,7 @@ sudo npm install -g npm
 # install local packages
 npm install
 
-sudo sed -i "/^exit 0$/ i ${SCRIPT_DIR}/init.d/sleep-notifier start\n" /etc/rc.local
+# Start and enable auto-start at boot
+sudo cp sleep_monitor_pn.service /lib/systemd/system/
+sudo systemctl start sleep_monitor_pn.service
+sudo systemctl enable sleep_monitor_pn.service
