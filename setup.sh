@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
 
-SCRIPT=`realpath $0`
-SCRIPT_DIR=`dirname $SCRIPT`
-
-sudo apt-get install -y nodejs npm pip
-
-# update itself
-sudo npm install -g npm
-
-# install local packages
-npm install
+# Install pip
+sudo apt-get install -y python-pip
 
 # Install nodenv
 sudo pip install nodeenv
 
 # Install node 8.9.1
-nodenv --node=8.9.1 env
+nodeenv --node=8.9.1 env
+
+# Activate the nodejs environment we just setup
+. ./env/bin/activate
+
+# install local packages
+npm install
 
 # Start and enable auto-start at boot
 envsubst < sleep_monitor_pn.service.template | sudo tee /lib/systemd/system/sleep_monitor_pn.service > /dev/null
