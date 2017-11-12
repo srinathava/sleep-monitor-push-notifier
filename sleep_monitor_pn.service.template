@@ -3,8 +3,8 @@ Description=Push Notifier for Sleep Monitor App
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/nodejs index.js
-WorkingDirectory=/home/pi/code/sleep-monitor-push-notifier
+ExecStart=${PWD}/env/bin/node index.js
+WorkingDirectory=${PWD}
 StandardOutput=inherit
 StandardError=inherit
 Restart=no

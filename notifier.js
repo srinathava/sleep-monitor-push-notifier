@@ -4,7 +4,9 @@ const admin = require("firebase-admin");
 const request = require('request');
 const throttle = require('throttle-debounce/throttle');
 const express = require('express');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const path = require('path');
+var fs = require('fs');
 
 class PushNotifier {
     constructor() {
@@ -15,12 +17,48 @@ class PushNotifier {
             databaseURL: "https://testproject-76824.firebaseio.com"
         });
 
-        this.deviceTokens = new Set();
+        this.deviceTokens = new Map();
 
         this.sendNotification = throttle(2*60*1000, true, this._sendNotification);
 
         this.startServer();
         this.updateStatus();
+        this.loadTokens();
+    }
+
+    tokenPath() {
+        return path.join(__dirname, '.registration_tokens');
+    }
+
+    loadTokens() {
+		fs.readFile(this.tokenPath(), 'utf8', (err, data) => {  
+            if (err) {
+                console.log(`Error reading from tokens file: ${err.message}`);
+                return;
+            }
+
+            var tokensWithTimeSpec = JSON.parse(data);
+
+            var tnow = Date.now();
+            for (var{tstamp, token} of tokensWithTimeSpec) {
+                if (tnow - tstamp < 2*24*60*60*1000) {
+                    console.log(`Registering ${token} from disc.`);
+                    this.deviceTokens.set(token, tstamp);
+                }
+            }
+		});
+    }
+
+    saveTokens() {
+        var tokensWithTimeSpec = [];
+        for (var[token, tstamp] of this.deviceTokens) {
+            tokensWithTimeSpec.push({tstamp, token});
+        }
+
+		fs.writeFile(this.tokenPath(), JSON.stringify(tokensWithTimeSpec), function(err, data) {
+            if (err) throw err;
+            console.log('Successfully wrote tokens to file');
+        });
     }
 
     _sendNotification() {
@@ -39,7 +77,7 @@ class PushNotifier {
 			timeToLive: 60 * 5
 		};
 
-        admin.messaging().sendToDevice(Array.from(this.deviceTokens), payload, options)
+        admin.messaging().sendToDevice(Array.from(this.deviceTokens.keys()), payload, options)
         .then(function(response) {
             console.log("Successfully sent message: ", response);
         })
@@ -80,7 +118,8 @@ class PushNotifier {
             console.log('POST /');
             console.dir(req.body);
 
-            this.deviceTokens.add(req.body.token);
+            this.deviceTokens.set(req.body.token, Date.now());
+            this.saveTokens();
 
             res.writeHead(200, {'Content-Type': 'application/json'});
             res.end(JSON.stringify({response: 'ok'}));
